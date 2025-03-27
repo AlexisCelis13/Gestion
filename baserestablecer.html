@@ -1,0 +1,1930 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Personal</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <style>
+        :root {
+            --primary-color: #28a745;
+            --primary-hover: #218838;
+            --secondary-color: #6c757d;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --danger-color: #dc3545;
+            --success-color: #28a745;
+            --bg-color: #f4f4f4;
+            --text-color: #333;
+            --card-bg: white;
+            --input-bg: white;
+            --input-text: #333;
+            --border-color: #ddd;
+            --table-header-bg: #f2f2f2;
+            --table-row-hover: #f9f9f9;
+            --modal-bg: rgba(0,0,0,0.5);
+            --modal-content-bg: white;
+            --close-color: #aaa;
+            --close-hover: black;
+            --tab-bg: #f8f9fa;
+            --tab-active-bg: white;
+            --success-text: green;
+        }
+        
+        body.dark-mode {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --card-bg: #1e1e1e;
+            --input-bg: #2d2d2d;
+            --input-text: #e0e0e0;
+            --border-color: #444;
+            --table-header-bg: #333;
+            --table-row-hover: #2a2a2a;
+            --modal-content-bg: #1e1e1e;
+            --close-color: #e0e0e0;
+            --close-hover: white;
+            --tab-bg: #2d2d2d;
+            --tab-active-bg: #1e1e1e;
+            --success-text: #4caf50;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 10px;
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+        
+        h1, h2 {
+            text-align: center;
+            color: var(--text-color);
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        input[type="text"], 
+        input[type="number"], 
+        input[type="date"],
+        input[type="email"],
+        input[type="password"],
+        button,
+        select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 16px;
+            background-color: var(--input-bg);
+            color: var(--input-text);
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            border: none;
+        }
+        
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+        
+        .btn-danger:hover {
+            background-color: #bd2130;
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        .btn-sm {
+            padding: 6px 10px;
+            font-size: 14px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: var(--card-bg);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .table-responsive {
+            overflow-x: auto;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        th {
+            background-color: var(--table-header-bg);
+            font-weight: bold;
+            color: var(--text-color);
+        }
+        
+        tr:hover {
+            background-color: var(--table-row-hover);
+        }
+        
+        .adelanto-input {
+            width: 80px;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        
+        .error {
+            color: var(--danger-color);
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .success {
+            color: var(--success-text);
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 3px 7px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .badge-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .badge-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .badge-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: var(--modal-bg);
+        }
+        
+        .modal-content {
+            background-color: var(--modal-content-bg);
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 600px;
+            animation: modalopen 0.3s;
+        }
+        
+        @keyframes modalopen {
+            from {opacity: 0; transform: translateY(-20px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+        
+        .close {
+            color: var(--close-color);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: var(--close-hover);
+        }
+        
+        /* Tabs for historical records */
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            background-color: var(--tab-bg);
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            margin-right: 5px;
+            border-radius: 4px 4px 0 0;
+            color: var(--text-color);
+        }
+        
+        .tab.active {
+            background-color: var(--tab-active-bg);
+            border-bottom: 1px solid var(--tab-active-bg);
+            margin-bottom: -1px;
+            font-weight: bold;
+        }
+        
+        /* Login form */
+        #loginContainer {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        #loginContainer h2 {
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+        
+        #loginForm .form-group {
+            margin-bottom: 15px;
+        }
+        
+        #loginForm label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+        
+        #loginError, #resetPasswordError {
+            color: var(--danger-color);
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        #resetPasswordSuccess {
+            color: var(--success-text);
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        #appContainer {
+            display: none;
+        }
+        
+        #userInfo {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: var(--card-bg);
+            border-radius: 4px;
+        }
+        
+        #userEmail {
+            font-weight: bold;
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Media queries for responsive design */
+        @media (min-width: 768px) {
+            .form-row {
+                flex-wrap: nowrap;
+            }
+            
+            .form-row > * {
+                flex: 1;
+            }
+            
+            .btn-group {
+                display: flex;
+                gap: 10px;
+            }
+            
+            .btn-group button {
+                flex: 1;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .container {
+                padding: 10px 5px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            table {
+                font-size: 14px;
+            }
+            
+            th, td {
+                padding: 8px;
+            }
+            
+            .mobile-full {
+                width: 100%;
+            }
+            
+            .mobile-stack {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .mobile-compact th, 
+            .mobile-compact td {
+                padding: 6px 4px;
+                font-size: 13px;
+            }
+            
+            .mobile-label {
+                font-weight: bold;
+                display: block;
+                margin-bottom: 5px;
+            }
+            
+            .attendance-cell {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .attendance-controls {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+            
+            .attendance-controls button {
+                padding: 4px 8px;
+                font-size: 12px;
+            }
+            
+            .adelanto-input {
+                width: 60px;
+            }
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .forgot-password a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Container -->
+    <div id="loginContainer">
+        <h2>Iniciar Sesión</h2>
+        <div id="loginError" class="error"></div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Correo Electrónico</label>
+                <input type="email" id="email" placeholder="Ingresa tu correo electrónico" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" placeholder="Ingresa tu contraseña" required>
+            </div>
+            <div class="form-row">
+                <button type="submit" id="loginButton">Iniciar Sesión</button>
+            </div>
+            <div class="form-row">
+                <button type="button" id="registerButton">Registrarse</button>
+            </div>
+        </form>
+        <div class="forgot-password">
+            <a href="#" id="forgotPasswordLink">¿Olvidaste tu contraseña?</a>
+        </div>
+        <div id="loginSpinner" class="spinner"></div>
+    </div>
+
+    <!-- Main App Container (hidden until login) -->
+    <div id="appContainer" class="container">
+        <div id="userInfo">
+            <span id="userEmail"></span>
+            <div>
+                <button id="toggleDarkMode" class="btn-secondary" style="margin-right: 10px;">Modo Oscuro</button>
+                <button id="logoutButton" class="btn-secondary">Cerrar Sesión</button>
+            </div>
+        </div>
+        
+        <h1>Gestión de Personal</h1>
+        
+        <div class="card">
+            <div class="card-header">Agregar Empleado</div>
+            <form id="formEmpleado">
+                <div class="form-row">
+                    <div>
+                        <input type="text" id="nombre" placeholder="Nombre del empleado" required>
+                    </div>
+                    <div>
+                        <input type="number" id="sueldo" placeholder="Sueldo" required>
+                    </div>
+                    <div>
+                        <button type="submit">Agregar Empleado</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">Préstamos</div>
+            <form id="formPrestamo">
+                <div class="form-row">
+                    <div>
+                        <input type="date" id="fechaPrestamo" required>
+                    </div>
+                    <div>
+                        <input type="number" id="cantidadPrestamo" placeholder="Cantidad del préstamo" required>
+                    </div>
+                    <div>
+                        <button type="submit">Agregar Préstamo</button>
+                    </div>
+                </div>
+            </form>
+            <div class="form-row">
+                <button id="btnVerPrestamos">Ver Registro de Préstamos</button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                Registro Actual
+                <div style="float: right;">
+                    <select id="semanaSelector">
+                        <option value="actual">Semana Actual</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <button id="btnGuardarRegistro" class="btn-secondary">Guardar Registro Semanal</button>
+            </div>
+            
+            <div class="table-responsive">
+                <table id="tablaEmpleados" class="mobile-compact"></table>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">Registros Históricos</div>
+            <div class="form-row">
+                <button id="btnVerHistorico">Ver Registros Históricos</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para mostrar los registros de préstamos -->
+    <div id="modalPrestamos" class="modal">
+        <div class="modal-content">
+            <span class="close" id="cerrarModalPrestamos">&times;</span>
+            <h2>Registro de Préstamos</h2>
+            <div class="table-responsive">
+                <table id="tablaPrestamosModal"></table>
+            </div>
+            <div class="form-row" style="margin-top: 15px;">
+                <button id="btnAgregarPrestamoModal">Agregar Préstamo</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para mostrar los registros históricos -->
+    <div id="modalHistorico" class="modal">
+        <div class="modal-content">
+            <span class="close" id="cerrarModalHistorico">&times;</span>
+            <h2>Registros Históricos</h2>
+            <div id="tabsHistorico" class="tabs"></div>
+            <div id="contenidoHistorico" class="table-responsive"></div>
+        </div>
+    </div>
+
+    <!-- Modal para restablecer contraseña -->
+    <div id="modalResetPassword" class="modal">
+        <div class="modal-content">
+            <span class="close" id="cerrarModalResetPassword">&times;</span>
+            <h2>Restablecer Contraseña</h2>
+            <p style="margin-bottom: 15px;">Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.</p>
+            <div id="resetPasswordError" class="error"></div>
+            <div id="resetPasswordSuccess" class="success"></div>
+            <form id="resetPasswordForm">
+                <div class="form-group">
+                    <label for="resetEmail">Correo Electrónico</label>
+                    <input type="email" id="resetEmail" placeholder="Ingresa tu correo electrónico" required>
+                </div>
+                <div class="form-row">
+                    <button type="submit" id="resetPasswordButton">Enviar Enlace</button>
+                </div>
+            </form>
+            <div id="resetPasswordSpinner" class="spinner"></div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración de Firebase
+        const firebaseConfig = {
+          apiKey: "AIzaSyANifDkgflK_L4ts_FAw71ubergwWMAJ38",
+          authDomain: "gestion-2f96c.firebaseapp.com",
+          databaseURL: "https://gestion-2f96c-default-rtdb.firebaseio.com",
+          projectId: "gestion-2f96c",
+          storageBucket: "gestion-2f96c.firebasestorage.app",
+          messagingSenderId: "1038984568752",
+          appId: "1:1038984568752:web:0cc7ac007934d3e1934075",
+          measurementId: "G-RTQK7693R8"
+        };
+        
+        try {
+            // Inicializar Firebase
+            firebase.initializeApp(firebaseConfig);
+            console.log("Firebase inicializado correctamente");
+            
+            // Referencias a servicios de Firebase
+            const auth = firebase.auth();
+            const database = firebase.database();
+            
+            // Variables globales
+            let empleados = [];
+            let totalPrestamos = 0;
+            let prestamos = [];
+            let registrosHistoricos = {};
+            let semanaActual = 'actual';
+            let currentUser = null;
+            
+            // Referencias a elementos del DOM para autenticación
+            const loginForm = document.getElementById('loginForm');
+            const loginButton = document.getElementById('loginButton');
+            const registerButton = document.getElementById('registerButton');
+            const logoutButton = document.getElementById('logoutButton');
+            const loginContainer = document.getElementById('loginContainer');
+            const appContainer = document.getElementById('appContainer');
+            const userEmailElement = document.getElementById('userEmail');
+            const loginError = document.getElementById('loginError');
+            const loginSpinner = document.getElementById('loginSpinner');
+            
+            // Referencias para el modo oscuro
+            const toggleDarkModeButton = document.getElementById('toggleDarkMode');
+            
+            // Referencias para restablecer contraseña
+            const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+            const modalResetPassword = document.getElementById('modalResetPassword');
+            const resetPasswordForm = document.getElementById('resetPasswordForm');
+            const resetPasswordButton = document.getElementById('resetPasswordButton');
+            const resetEmail = document.getElementById('resetEmail');
+            const resetPasswordError = document.getElementById('resetPasswordError');
+            const resetPasswordSuccess = document.getElementById('resetPasswordSuccess');
+            const resetPasswordSpinner = document.getElementById('resetPasswordSpinner');
+            const cerrarModalResetPassword = document.getElementById('cerrarModalResetPassword');
+            
+            // Referencias a formularios y botones
+            const formEmpleado = document.getElementById('formEmpleado');
+            const formPrestamo = document.getElementById('formPrestamo');
+            const btnVerPrestamos = document.getElementById('btnVerPrestamos');
+            const btnGuardarRegistro = document.getElementById('btnGuardarRegistro');
+            const btnVerHistorico = document.getElementById('btnVerHistorico');
+            const semanaSelector = document.getElementById('semanaSelector');
+            const btnAgregarPrestamoModal = document.getElementById('btnAgregarPrestamoModal');
+            const cerrarModalPrestamos = document.getElementById('cerrarModalPrestamos');
+            const cerrarModalHistorico = document.getElementById('cerrarModalHistorico');
+            
+            // Cargar preferencia de modo oscuro
+            document.addEventListener('DOMContentLoaded', function() {
+                const savedDarkMode = localStorage.getItem('darkMode');
+                if (savedDarkMode === 'true') {
+                    document.body.classList.add('dark-mode');
+                    if (toggleDarkModeButton) {
+                        toggleDarkModeButton.textContent = 'Modo Claro';
+                    }
+                }
+            });
+            
+            // Evento para cambiar entre modo claro y oscuro
+            if (toggleDarkModeButton) {
+                toggleDarkModeButton.addEventListener('click', function() {
+                    document.body.classList.toggle('dark-mode');
+                    
+                    // Guardar preferencia en localStorage
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    localStorage.setItem('darkMode', isDarkMode);
+                    
+                    // Actualizar texto del botón
+                    toggleDarkModeButton.textContent = isDarkMode ? 'Modo Claro' : 'Modo Oscuro';
+                });
+            }
+            
+            // Evento para abrir modal de restablecimiento de contraseña
+            if (forgotPasswordLink) {
+                forgotPasswordLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Limpiar mensajes anteriores
+                    resetPasswordError.style.display = 'none';
+                    resetPasswordSuccess.style.display = 'none';
+                    
+                    // Copiar el email del formulario de login si existe
+                    const loginEmail = document.getElementById('email').value;
+                    if (loginEmail) {
+                        resetEmail.value = loginEmail;
+                    }
+                    
+                    // Mostrar el modal
+                    modalResetPassword.style.display = 'block';
+                });
+            }
+            
+            // Evento para cerrar modal de restablecimiento de contraseña
+            if (cerrarModalResetPassword) {
+                cerrarModalResetPassword.addEventListener('click', function() {
+                    modalResetPassword.style.display = 'none';
+                });
+            }
+            
+            // Evento para enviar formulario de restablecimiento de contraseña
+            if (resetPasswordForm) {
+                resetPasswordForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const email = resetEmail.value.trim();
+                    
+                    if (!email) {
+                        resetPasswordError.textContent = 'Por favor, ingresa tu correo electrónico.';
+                        resetPasswordError.style.display = 'block';
+                        resetPasswordSuccess.style.display = 'none';
+                        return;
+                    }
+                    
+                    // Mostrar spinner y deshabilitar botón
+                    resetPasswordButton.disabled = true;
+                    resetPasswordSpinner.style.display = 'block';
+                    resetPasswordError.style.display = 'none';
+                    resetPasswordSuccess.style.display = 'none';
+                    
+                    try {
+                        await auth.sendPasswordResetEmail(email);
+                        
+                        // Mostrar mensaje de éxito
+                        resetPasswordSuccess.textContent = `Se ha enviado un correo a ${email} con instrucciones para restablecer tu contraseña.`;
+                        resetPasswordSuccess.style.display = 'block';
+                        
+                        // Limpiar el formulario
+                        resetEmail.value = '';
+                        
+                        // Cerrar el modal después de 5 segundos
+                        setTimeout(function() {
+                            modalResetPassword.style.display = 'none';
+                        }, 5000);
+                    } catch (error) {
+                        console.error('Error al enviar correo de restablecimiento:', error);
+                        resetPasswordError.textContent = obtenerMensajeError(error.code);
+                        resetPasswordError.style.display = 'block';
+                    } finally {
+                        // Ocultar spinner y habilitar botón
+                        resetPasswordButton.disabled = false;
+                        resetPasswordSpinner.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Evento para iniciar sesión
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                
+                console.log("Intentando iniciar sesión con:", email);
+                
+                loginError.style.display = 'none';
+                loginButton.disabled = true;
+                loginSpinner.style.display = 'block';
+                
+                try {
+                    console.log("Llamando a signInWithEmailAndPassword");
+                    await auth.signInWithEmailAndPassword(email, password);
+                    console.log("Inicio de sesión exitoso");
+                    // El estado de autenticación se maneja en el listener de auth.onAuthStateChanged
+                } catch (error) {
+                    console.error("Error al iniciar sesión:", error);
+                    loginError.textContent = obtenerMensajeError(error.code);
+                    loginError.style.display = 'block';
+                    loginButton.disabled = false;
+                    loginSpinner.style.display = 'none';
+                }
+            });
+            
+            // Evento para registrar un nuevo usuario
+            registerButton.addEventListener('click', async () => {
+                console.log("Botón de registro clickeado");
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                
+                console.log("Intentando registrar con:", email);
+                
+                if (!email || !password) {
+                    loginError.textContent = "Por favor, ingresa un correo y contraseña válidos.";
+                    loginError.style.display = 'block';
+                    return;
+                }
+                
+                if (password.length < 6) {
+                    loginError.textContent = "La contraseña debe tener al menos 6 caracteres.";
+                    loginError.style.display = 'block';
+                    return;
+                }
+                
+                loginError.style.display = 'none';
+                loginButton.disabled = true;
+                registerButton.disabled = true;
+                loginSpinner.style.display = 'block';
+                
+                try {
+                    console.log("Llamando a createUserWithEmailAndPassword");
+                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                    console.log("Usuario registrado:", userCredential.user);
+                    
+                    // Crear datos iniciales para el usuario en la base de datos
+                    const userId = userCredential.user.uid;
+                    const userRef = database.ref('usuarios/' + userId);
+                    
+                    await userRef.set({
+                        email: email,
+                        createdAt: new Date().toISOString()
+                    });
+                    
+                    // Inicializar las estructuras de datos para el usuario
+                    await userRef.child('empleados').set({
+                        info: { mensaje: "Colección de empleados inicializada" }
+                    });
+                    
+                    await userRef.child('prestamos').set({
+                        info: { mensaje: "Colección de préstamos inicializada" }
+                    });
+                    
+                    await userRef.child('registrosHistoricos').set({
+                        info: { mensaje: "Colección de registros históricos inicializada" }
+                    });
+                    
+                    console.log("Datos iniciales creados para el usuario:", userId);
+                    
+                } catch (error) {
+                    console.error("Error completo:", error);
+                    console.error("Código de error:", error.code);
+                    console.error("Mensaje de error:", error.message);
+                    
+                    loginError.textContent = obtenerMensajeError(error.code);
+                    loginError.style.display = 'block';
+                    loginButton.disabled = false;
+                    registerButton.disabled = false;
+                    loginSpinner.style.display = 'none';
+                }
+            });
+            
+            // Evento para cerrar sesión
+            logoutButton.addEventListener('click', async () => {
+                try {
+                    // Limpiar datos locales antes de cerrar sesión
+                    empleados = [];
+                    prestamos = [];
+                    totalPrestamos = 0;
+                    registrosHistoricos = {};
+                    
+                    await auth.signOut();
+                    console.log("Sesión cerrada correctamente");
+                    // El estado de autenticación se maneja en el listener de auth.onAuthStateChanged
+                } catch (error) {
+                    console.error("Error al cerrar sesión:", error);
+                    alert("Error al cerrar sesión. Por favor, intenta de nuevo.");
+                }
+            });
+            
+            // Listener para cambios en el estado de autenticación
+            auth.onAuthStateChanged(async (user) => {
+                console.log("Estado de autenticación cambiado:", user ? user.email : "No hay usuario");
+                
+                loginButton.disabled = false;
+                registerButton.disabled = false;
+                loginSpinner.style.display = 'none';
+                
+                if (user) {
+                    // Usuario autenticado
+                    currentUser = user;
+                    userEmailElement.textContent = user.email;
+                    
+                    // Mostrar la aplicación y ocultar el formulario de login
+                    loginContainer.style.display = 'none';
+                    appContainer.style.display = 'block';
+                    
+                    // Cargar datos del usuario desde la base de datos
+                    await cargarDatos();
+                    
+                    // Actualizar la interfaz
+                    actualizarSelectorSemanas();
+                    actualizarTabla();
+                    
+                    // Establecer la fecha actual en el campo de fecha de préstamo
+                    const fechaHoy = new Date().toISOString().split('T')[0];
+                    document.getElementById('fechaPrestamo').value = fechaHoy;
+                } else {
+                    // No hay usuario autenticado
+                    currentUser = null;
+                    
+                    // Mostrar el formulario de login y ocultar la aplicación
+                    loginContainer.style.display = 'block';
+                    appContainer.style.display = 'none';
+                    
+                    // Limpiar campos del formulario
+                    document.getElementById('email').value = '';
+                    document.getElementById('password').value = '';
+                }
+            });
+            
+            // Función para obtener mensajes de error en español
+            function obtenerMensajeError(errorCode) {
+                switch (errorCode) {
+                    case 'auth/invalid-email':
+                        return 'El correo electrónico no es válido.';
+                    case 'auth/user-disabled':
+                        return 'Esta cuenta ha sido deshabilitada.';
+                    case 'auth/user-not-found':
+                        return 'No existe una cuenta con este correo electrónico.';
+                    case 'auth/wrong-password':
+                        return 'Contraseña incorrecta.';
+                    case 'auth/email-already-in-use':
+                        return 'Este correo electrónico ya está en uso.';
+                    case 'auth/weak-password':
+                        return 'La contraseña es demasiado débil.';
+                    case 'auth/missing-email':
+                        return 'Por favor, ingresa un correo electrónico.';
+                    case 'auth/too-many-requests':
+                        return 'Demasiados intentos fallidos. Por favor, intenta más tarde.';
+                    default:
+                        return 'Error al realizar la operación. Por favor, intenta de nuevo.';
+                }
+            }
+            
+            // Función para cargar datos desde la base de datos
+            async function cargarDatos() {
+                try {
+                    if (!currentUser) {
+                        console.error("No hay usuario autenticado para cargar datos");
+                        return;
+                    }
+                    
+                    const userId = currentUser.uid;
+                    console.log("Cargando datos para el usuario:", userId);
+                    
+                    // Referencia al nodo del usuario
+                    const userRef = database.ref('usuarios/' + userId);
+                    
+                    // Verificar si existe el usuario
+                    const userSnapshot = await userRef.once('value');
+                    
+                    if (!userSnapshot.exists()) {
+                        // Crear datos iniciales para el usuario si no existen
+                        await userRef.set({
+                            email: currentUser.email,
+                            createdAt: new Date().toISOString()
+                        });
+                        
+                        // Inicializar las estructuras de datos para el usuario
+                        await userRef.child('empleados').set({
+                            info: { mensaje: "Colección de empleados inicializada" }
+                        });
+                        
+                        await userRef.child('prestamos').set({
+                            info: { mensaje: "Colección de préstamos inicializada" }
+                        });
+                        
+                        await userRef.child('registrosHistoricos').set({
+                            info: { mensaje: "Colección de registros históricos inicializada" }
+                        });
+                        
+                        console.log("Datos iniciales creados para el usuario:", userId);
+                    }
+                    
+                    // Cargar empleados
+                    const empleadosSnapshot = await userRef.child('empleados').once('value');
+                    empleados = [];
+                    
+                    empleadosSnapshot.forEach(childSnapshot => {
+                        const key = childSnapshot.key;
+                        const data = childSnapshot.val();
+                        
+                        // Ignorar el nodo 'info'
+                        if (key !== 'info' && data.nombre) {
+                            empleados.push({
+                                id: key,
+                                ...data
+                            });
+                        }
+                    });
+                    
+                    console.log("Empleados cargados:", empleados.length);
+                    
+                    // Cargar préstamos
+                    const prestamosSnapshot = await userRef.child('prestamos').once('value');
+                    prestamos = [];
+                    totalPrestamos = 0;
+                    
+                    prestamosSnapshot.forEach(childSnapshot => {
+                        const key = childSnapshot.key;
+                        const data = childSnapshot.val();
+                        
+                        // Ignorar el nodo 'info'
+                        if (key !== 'info' && data.cantidad) {
+                            prestamos.push({
+                                id: key,
+                                ...data
+                            });
+                            totalPrestamos += parseFloat(data.cantidad || 0);
+                        }
+                    });
+                    
+                    console.log("Préstamos cargados:", prestamos.length, "Total:", totalPrestamos);
+                    
+                    // Cargar registros históricos
+                    const registrosSnapshot = await userRef.child('registrosHistoricos').once('value');
+                    registrosHistoricos = {};
+                    
+                    registrosSnapshot.forEach(childSnapshot => {
+                        const key = childSnapshot.key;
+                        const data = childSnapshot.val();
+                        
+                        // Ignorar el nodo 'info'
+                        if (key !== 'info' && data.fecha) {
+                            registrosHistoricos[key] = data;
+                        }
+                    });
+                    
+                    console.log("Registros históricos cargados:", Object.keys(registrosHistoricos).length);
+                    console.log("Datos cargados correctamente para el usuario:", userId);
+                    
+                } catch (error) {
+                    console.error("Error al cargar datos:", error);
+                    alert("Error al cargar datos. Por favor, recarga la página.");
+                }
+            }
+            
+            // Evento para agregar empleado
+            formEmpleado.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                try {
+                    console.log("Formulario de empleado enviado");
+                    
+                    const nombre = document.getElementById('nombre').value.trim();
+                    const sueldoInput = document.getElementById('sueldo').value;
+                    const sueldo = parseFloat(sueldoInput);
+                    
+                    console.log("Datos del formulario:", { nombre, sueldo });
+                    
+                    if (!nombre || isNaN(sueldo) || sueldo <= 0) {
+                        alert("Por favor, ingresa un nombre válido y un sueldo mayor que cero.");
+                        return;
+                    }
+                    
+                    // Verificar si el nombre ya existe
+                    if (empleados.some(empleado => empleado.nombre && empleado.nombre.toLowerCase() === nombre.toLowerCase())) {
+                        alert("El nombre ya existe. Por favor, elige un nombre diferente.");
+                        return;
+                    }
+                    
+                    if (!currentUser) {
+                        console.error("No hay usuario autenticado");
+                        alert("Debes iniciar sesión para agregar empleados.");
+                        return;
+                    }
+                    
+                    // Crear referencia para el nuevo empleado
+                    const userRef = database.ref('usuarios/' + currentUser.uid);
+                    const nuevoEmpleadoRef = userRef.child('empleados').push();
+                    
+                    const nuevoEmpleado = { 
+                        id: nuevoEmpleadoRef.key,
+                        nombre, 
+                        sueldo, 
+                        asistencia: Array(6).fill(true), 
+                        adelantos: Array(6).fill(0) 
+                    };
+                    
+                    console.log("Nuevo empleado a agregar:", nuevoEmpleado);
+                    
+                    // Guardar en la base de datos
+                    await nuevoEmpleadoRef.set({
+                        nombre: nuevoEmpleado.nombre,
+                        sueldo: nuevoEmpleado.sueldo,
+                        asistencia: nuevoEmpleado.asistencia,
+                        adelantos: nuevoEmpleado.adelantos
+                    });
+                    
+                    // Agregar a la lista local
+                    empleados.push(nuevoEmpleado);
+                    
+                    // Actualizar la interfaz
+                    actualizarTabla();
+                    
+                    // Limpiar el formulario
+                    document.getElementById('nombre').value = '';
+                    document.getElementById('sueldo').value = '';
+                    
+                    console.log("Empleado agregado correctamente");
+                    alert("Empleado agregado correctamente");
+                } catch (error) {
+                    console.error("Error al agregar empleado:", error);
+                    alert("Error al agregar empleado: " + error.message);
+                }
+            });
+            
+            // Evento para agregar préstamo
+            formPrestamo.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                try {
+                    const cantidad = parseFloat(document.getElementById('cantidadPrestamo').value);
+                    const fecha = document.getElementById('fechaPrestamo').value;
+                    
+                    if (isNaN(cantidad) || cantidad <= 0 || !fecha) {
+                        alert("Por favor, ingresa una cantidad y fecha válidas.");
+                        return;
+                    }
+                    
+                    if (!currentUser) {
+                        console.error("No hay usuario autenticado");
+                        alert("Debes iniciar sesión para agregar préstamos.");
+                        return;
+                    }
+                    
+                    // Crear referencia para el nuevo préstamo
+                    const userRef = database.ref('usuarios/' + currentUser.uid);
+                    const nuevoPrestamoRef = userRef.child('prestamos').push();
+                    
+                    const nuevoPrestamo = {
+                        id: nuevoPrestamoRef.key,
+                        fecha, 
+                        cantidad
+                    };
+                    
+                    // Guardar en la base de datos
+                    await nuevoPrestamoRef.set({
+                        fecha: nuevoPrestamo.fecha,
+                        cantidad: nuevoPrestamo.cantidad
+                    });
+                    
+                    // Agregar a la lista local
+                    prestamos.push(nuevoPrestamo);
+                    totalPrestamos += cantidad;
+                    
+                    // Limpiar el formulario
+                    document.getElementById('cantidadPrestamo').value = '';
+                    document.getElementById('fechaPrestamo').value = new Date().toISOString().split('T')[0];
+                    
+                    // Actualizar la interfaz
+                    actualizarTabla();
+                    
+                    console.log("Préstamo agregado correctamente");
+                    alert("Préstamo agregado correctamente");
+                } catch (error) {
+                    console.error("Error al agregar préstamo:", error);
+                    alert("Error al agregar préstamo: " + error.message);
+                }
+            });
+            
+            // Función para guardar el registro semanal actual
+            async function guardarRegistroSemanal() {
+                try {
+                    if (!currentUser) {
+                        alert("Debes iniciar sesión para guardar registros.");
+                        return;
+                    }
+                    
+                    const idSemana = generarIdSemana();
+                    const fechaTexto = new Date().toLocaleDateString('es-ES');
+                    
+                    // Crear una copia profunda de los datos actuales
+                    const registroActual = {
+                        fecha: fechaTexto,
+                        empleados: JSON.parse(JSON.stringify(empleados)),
+                        prestamos: JSON.parse(JSON.stringify(prestamos)),
+                        totalPrestamos: totalPrestamos
+                    };
+                    
+                    // Guardar en el objeto de registros históricos
+                    registrosHistoricos[idSemana] = registroActual;
+                    
+                    // Guardar en la base de datos
+                    const userRef = database.ref('usuarios/' + currentUser.uid);
+                    await userRef.child('registrosHistoricos').child(idSemana).set(registroActual);
+                    
+                    // Actualizar el selector de semanas
+                    actualizarSelectorSemanas();
+                    
+                    alert(`Registro guardado correctamente: ${fechaTexto}`);
+                } catch (error) {
+                    console.error("Error al guardar registro semanal:", error);
+                    alert("Error al guardar registro semanal: " + error.message);
+                }
+            }
+            
+            // Función para generar un ID único para cada semana
+            function generarIdSemana() {
+                const fecha = new Date();
+                return `semana_${fecha.getFullYear()}_${fecha.getMonth() + 1}_${fecha.getDate()}`;
+            }
+            
+            // Función para calcular el total de adelantos de un empleado
+            function calcularTotalAdelantos(empleado) {
+                if (!empleado.adelantos || !Array.isArray(empleado.adelantos)) {
+                    return 0;
+                }
+                return empleado.adelantos.reduce((acc, curr) => acc + parseFloat(curr || 0), 0);
+            }
+            
+            // Función para actualizar el selector de semanas
+            function actualizarSelectorSemanas() {
+                const selector = document.getElementById('semanaSelector');
+                
+                // Guardar la selección actual
+                const seleccionActual = selector.value;
+                
+                // Limpiar opciones existentes
+                selector.innerHTML = '<option value="actual">Semana Actual</option>';
+                
+                // Agregar opciones para cada registro histórico
+                for (const idSemana in registrosHistoricos) {
+                    const registro = registrosHistoricos[idSemana];
+                    const option = document.createElement('option');
+                    option.value = idSemana;
+                    option.textContent = `Semana del ${registro.fecha}`;
+                    selector.appendChild(option);
+                }
+                
+                // Restaurar la selección si existe
+                if (seleccionActual && selector.querySelector(`option[value="${seleccionActual}"]`)) {
+                    selector.value = seleccionActual;
+                }
+            }
+            
+            // Función para cambiar la semana mostrada
+            function cambiarSemana() {
+                const selector = document.getElementById('semanaSelector');
+                semanaActual = selector.value;
+                
+                if (semanaActual === 'actual') {
+                    // Mostrar datos actuales
+                    actualizarTabla();
+                } else {
+                    // Mostrar datos históricos
+                    mostrarDatosHistoricos(semanaActual);
+                }
+            }
+            
+            // Función para mostrar datos históricos
+            function mostrarDatosHistoricos(idSemana) {
+                const registro = registrosHistoricos[idSemana];
+                if (!registro) return;
+                
+                const tabla = document.getElementById('tablaEmpleados');
+                tabla.innerHTML = '';
+                
+                // Crear encabezados de la tabla
+                const encabezado = document.createElement('tr');
+                encabezado.innerHTML = `
+                    <th>Nombre</th>
+                    <th>Sueldo</th>
+                    <th>Total Adelantos</th>
+                    <th>Saldo Neto</th>
+                    <th colspan="6">Asistencia y Adelantos</th>
+                `;
+                tabla.appendChild(encabezado);
+                
+                // Agregar fila de días de la semana
+                const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+                const filaDias = document.createElement('tr');
+                filaDias.innerHTML = `<th colspan="4"></th>` + diasSemana.map(dia => `<th>${dia}</th>`).join('');
+                tabla.appendChild(filaDias);
+                
+                // Mostrar empleados del registro histórico
+                registro.empleados.forEach((empleado) => {
+                    const fila = document.createElement('tr');
+                    const totalAdelantos = calcularTotalAdelantos(empleado);
+                    const sueldoFinal = calcularSueldo(empleado);
+                    
+                    fila.innerHTML = `
+                        <td>${empleado.nombre}</td>
+                        <td>${empleado.sueldo.toFixed(2)}</td>
+                        <td>${totalAdelantos.toFixed(2)}</td>
+                        <td>${sueldoFinal.toFixed(2)}</td>
+                        ${empleado.asistencia.map((asiste, dia) => `
+                            <td class="attendance-cell">
+                                <span class="badge ${asiste ? 'badge-success' : 'badge-danger'}">
+                                    ${asiste ? 'Presente' : 'Ausente'}
+                                </span>
+                                ${empleado.adelantos[dia] > 0 ? `<div>Adelanto: ${empleado.adelantos[dia]}</div>` : ''}
+                            </td>
+                        `).join('')}
+                    `;
+                    tabla.appendChild(fila);
+                });
+                
+                // Agregar fila para mostrar el total de préstamos
+                const filaTotalPrestamos = document.createElement('tr');
+                filaTotalPrestamos.innerHTML = `
+                    <td colspan="9" style="text-align: right;"><strong>Total de Préstamos:</strong></td>
+                    <td><strong>${registro.totalPrestamos.toFixed(2)}</strong></td>
+                `;
+                tabla.appendChild(filaTotalPrestamos);
+            }
+            
+            // Función para mostrar los registros históricos en el modal
+            function mostrarRegistrosHistoricos() {
+                const tabsContainer = document.getElementById('tabsHistorico');
+                const contenidoContainer = document.getElementById('contenidoHistorico');
+                
+                tabsContainer.innerHTML = '';
+                contenidoContainer.innerHTML = '';
+                
+                // Si no hay registros históricos
+                if (Object.keys(registrosHistoricos).length === 0) {
+                    contenidoContainer.innerHTML = '<p>No hay registros históricos disponibles.</p>';
+                    return;
+                }
+                
+                // Crear pestañas para cada registro
+                let primeraTab = true;
+                for (const idSemana in registrosHistoricos) {
+                    const registro = registrosHistoricos[idSemana];
+                    
+                    // Crear la pestaña
+                    const tab = document.createElement('div');
+                    tab.className = `tab ${primeraTab ? 'active' : ''}`;
+                    tab.textContent = `Semana del ${registro.fecha}`;
+                    tab.dataset.id = idSemana;
+                    tab.onclick = function() {
+                        // Desactivar todas las pestañas
+                        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                        // Activar esta pestaña
+                        this.classList.add('active');
+                        // Mostrar el contenido correspondiente
+                        mostrarContenidoHistorico(this.dataset.id);
+                    };
+                    
+                    tabsContainer.appendChild(tab);
+                    
+                    // Si es la primera pestaña, mostrar su contenido
+                    if (primeraTab) {
+                        mostrarContenidoHistorico(idSemana);
+                        primeraTab = false;
+                    }
+                }
+            }
+            
+            // Función para mostrar el contenido de un registro histórico específico
+            function mostrarContenidoHistorico(idSemana) {
+                const registro = registrosHistoricos[idSemana];
+                const contenidoContainer = document.getElementById('contenidoHistorico');
+                
+                contenidoContainer.innerHTML = '';
+                
+                // Crear tabla para mostrar los datos
+                const tabla = document.createElement('table');
+                
+                // Crear encabezados de la tabla
+                const encabezado = document.createElement('tr');
+                encabezado.innerHTML = `
+                    <th>Nombre</th>
+                    <th>Sueldo</th>
+                    <th>Total Adelantos</th>
+                    <th>Saldo Neto</th>
+                    <th colspan="6">Asistencia y Adelantos</th>
+                `;
+                tabla.appendChild(encabezado);
+                
+                // Agregar fila de días de la semana
+                const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+                const filaDias = document.createElement('tr');
+                filaDias.innerHTML = `<th colspan="4"></th>` + diasSemana.map(dia => `<th>${dia}</th>`).join('');
+                tabla.appendChild(filaDias);
+                
+                // Mostrar empleados del registro histórico
+                registro.empleados.forEach((empleado) => {
+                    const fila = document.createElement('tr');
+                    const totalAdelantos = calcularTotalAdelantos(empleado);
+                    const sueldoFinal = calcularSueldo(empleado);
+                    
+                    fila.innerHTML = `
+                        <td>${empleado.nombre}</td>
+                        <td>${empleado.sueldo.toFixed(2)}</td>
+                        <td>${totalAdelantos.toFixed(2)}</td>
+                        <td>${sueldoFinal.toFixed(2)}</td>
+                        ${empleado.asistencia.map((asiste, dia) => `
+                            <td class="attendance-cell">
+                                <span class="badge ${asiste ? 'badge-success' : 'badge-danger'}">
+                                    ${asiste ? 'Presente' : 'Ausente'}
+                                </span>
+                                ${empleado.adelantos[dia] > 0 ? `<div>Adelanto: ${empleado.adelantos[dia]}</div>` : ''}
+                            </td>
+                        `).join('')}
+                    `;
+                    tabla.appendChild(fila);
+                });
+                
+                // Agregar fila para mostrar el total de préstamos
+                const filaTotalPrestamos = document.createElement('tr');
+                filaTotalPrestamos.innerHTML = `
+                    <td colspan="9" style="text-align: right;"><strong>Total de Préstamos:</strong></td>
+                    <td><strong>${registro.totalPrestamos.toFixed(2)}</strong></td>
+                `;
+                tabla.appendChild(filaTotalPrestamos);
+                
+                // Agregar botones para exportar o eliminar el registro
+                const botonesContainer = document.createElement('div');
+                botonesContainer.className = 'form-row';
+                botonesContainer.style.marginTop = '15px';
+                
+                botonesContainer.innerHTML = `
+                    <button onclick="exportarRegistro('${idSemana}')" class="btn-secondary">Exportar a CSV</button>
+                    <button onclick="eliminarRegistro('${idSemana}')" class="btn-danger">Eliminar Registro</button>
+                `;
+                
+                // Agregar la tabla y los botones al contenedor
+                contenidoContainer.appendChild(tabla);
+                contenidoContainer.appendChild(botonesContainer);
+            }
+            
+            // Función para exportar un registro a CSV
+            function exportarRegistro(idSemana) {
+                const registro = registrosHistoricos[idSemana];
+                if (!registro) return;
+                
+                const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+                
+                // Crear encabezados del CSV
+                let csv = 'Nombre,Sueldo,Total Adelantos,Saldo Neto,' + diasSemana.join(',') + '\n';
+                
+                // Agregar datos de cada empleado
+                registro.empleados.forEach(empleado => {
+                    const totalAdelantos = calcularTotalAdelantos(empleado);
+                    const sueldoFinal = calcularSueldo(empleado);
+                    
+                    // Datos básicos del empleado
+                    let fila = `"${empleado.nombre}",${empleado.sueldo.toFixed(2)},${totalAdelantos.toFixed(2)},${sueldoFinal.toFixed(2)},`;
+                    
+                    // Datos de asistencia y adelantos
+                    fila += empleado.asistencia.map((asiste, dia) => {
+                        let celda = asiste ? 'Presente' : 'Ausente';
+                        if (empleado.adelantos[dia] > 0) {
+                            celda += ` (Adelanto: ${empleado.adelantos[dia]})`;
+                        }
+                        return `"${celda}"`;
+                    }).join(',');
+                    
+                    csv += fila + '\n';
+                });
+                
+                // Agregar total de préstamos
+                csv += `"Total de Préstamos",,,${registro.totalPrestamos.toFixed(2)},,,,,\n`;
+                
+                // Crear un enlace para descargar el archivo
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', `registro_${registro.fecha.replace(/\//g, '-')}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+            
+            // Función para eliminar un registro histórico
+            async function eliminarRegistro(idSemana) {
+                if (confirm('¿Estás seguro de que deseas eliminar este registro? Esta acción no se puede deshacer.')) {
+                    try {
+                        delete registrosHistoricos[idSemana];
+                        
+                        // Eliminar de la base de datos
+                        const userRef = database.ref('usuarios/' + currentUser.uid);
+                        await userRef.child('registrosHistoricos').child(idSemana).remove();
+                        
+                        // Actualizar la vista
+                        mostrarRegistrosHistoricos();
+                        actualizarSelectorSemanas();
+                        
+                        alert('Registro eliminado correctamente.');
+                    } catch (error) {
+                        console.error("Error al eliminar registro:", error);
+                        alert("Error al eliminar registro: " + error.message);
+                    }
+                }
+            }
+            
+            // Función para eliminar un empleado
+            async function eliminarEmpleado(index) {
+                try {
+                    if (confirm('¿Estás seguro de que deseas eliminar este empleado?')) {
+                        const empleado = empleados[index];
+                        
+                        // Eliminar de la base de datos
+                        if (currentUser && empleado.id) {
+                            const userRef = database.ref('usuarios/' + currentUser.uid);
+                            await userRef.child('empleados').child(empleado.id).remove();
+                        }
+                        
+                        // Eliminar de la lista local
+                        empleados.splice(index, 1);
+                        
+                        // Actualizar la interfaz
+                        actualizarTabla();
+                        
+                        console.log("Empleado eliminado correctamente");
+                    }
+                } catch (error) {
+                    console.error("Error al eliminar empleado:", error);
+                    alert("Error al eliminar empleado: " + error.message);
+                }
+            }
+
+            // Función para marcar asistencia
+            async function marcarAsistencia(index, dia) {
+                try {
+                    const empleado = empleados[index];
+                    empleado.asistencia[dia] = !empleado.asistencia[dia];
+                    
+                    // Actualizar en la base de datos
+                    if (currentUser && empleado.id) {
+                        const userRef = database.ref('usuarios/' + currentUser.uid);
+                        await userRef.child('empleados').child(empleado.id).child('asistencia').set(empleado.asistencia);
+                    }
+                    
+                    // Actualizar la interfaz
+                    actualizarTabla();
+                    
+                    console.log("Asistencia actualizada correctamente");
+                } catch (error) {
+                    console.error("Error al marcar asistencia:", error);
+                    alert("Error al marcar asistencia: " + error.message);
+                }
+            }
+
+            // Función para agregar adelanto
+            async function agregarAdelanto(index, dia) {
+                try {
+                    const adelantoInput = document.getElementById(`adelanto-${index}-${dia}`);
+                    const adelanto = parseFloat(adelantoInput.value) || 0;
+                    
+                    if (adelanto <= 0) {
+                        alert("Por favor, ingresa una cantidad válida mayor que cero.");
+                        return;
+                    }
+                    
+                    const empleado = empleados[index];
+                    empleado.adelantos[dia] = (parseFloat(empleado.adelantos[dia]) || 0) + adelanto;
+                    
+                    // Actualizar en la base de datos
+                    if (currentUser && empleado.id) {
+                        const userRef = database.ref('usuarios/' + currentUser.uid);
+                        await userRef.child('empleados').child(empleado.id).child('adelantos').set(empleado.adelantos);
+                    }
+                    
+                    // Limpiar el input
+                    adelantoInput.value = '';
+                    
+                    // Actualizar la interfaz
+                    actualizarTabla();
+                    
+                    console.log("Adelanto agregado correctamente");
+                } catch (error) {
+                    console.error("Error al agregar adelanto:", error);
+                    alert("Error al agregar adelanto: " + error.message);
+                }
+            }
+
+            // Función para quitar adelanto
+            async function quitarAdelanto(index, dia) {
+                try {
+                    const empleado = empleados[index];
+                    empleado.adelantos[dia] = 0;
+                    
+                    // Actualizar en la base de datos
+                    if (currentUser && empleado.id) {
+                        const userRef = database.ref('usuarios/' + currentUser.uid);
+                        await userRef.child('empleados').child(empleado.id).child('adelantos').set(empleado.adelantos);
+                    }
+                    
+                    // Actualizar la interfaz
+                    actualizarTabla();
+                    
+                    console.log("Adelanto quitado correctamente");
+                } catch (error) {
+                    console.error("Error al quitar adelanto:", error);
+                    alert("Error al quitar adelanto: " + error.message);
+                }
+            }
+
+            // Función para calcular sueldo
+            function calcularSueldo(empleado) {
+                if (!empleado || !empleado.sueldo || !empleado.asistencia || !Array.isArray(empleado.asistencia)) {
+                    return 0;
+                }
+                
+                const faltas = empleado.asistencia.filter(dia => !dia).length;
+                const totalAdelantos = calcularTotalAdelantos(empleado);
+                return empleado.sueldo - (empleado.sueldo / 6) * faltas - totalAdelantos;
+            }
+
+            // Función para actualizar la tabla de empleados
+            function actualizarTabla() {
+                // Si estamos viendo un registro histórico, no actualizar la tabla
+                if (semanaActual !== 'actual') {
+                    return;
+                }
+                
+                const tabla = document.getElementById('tablaEmpleados');
+                tabla.innerHTML = '';
+                
+                if (empleados.length === 0) {
+                    tabla.innerHTML = '<tr><td colspan="11" style="text-align: center;">No hay empleados registrados</td></tr>';
+                    return;
+                }
+
+                // Crear encabezados de la tabla
+                const encabezado = document.createElement('tr');
+                encabezado.innerHTML = `
+                    <th>Nombre</th>
+                    <th>Sueldo</th>
+                    <th>Total Adelantos</th>
+                    <th>Saldo Neto</th>
+                    <th colspan="6">Asistencia y Adelantos</th>
+                    <th>Acciones</th>
+                `;
+                tabla.appendChild(encabezado);
+
+                // Agregar fila de días de la semana
+                const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+                const filaDias = document.createElement('tr');
+                filaDias.innerHTML = `<th colspan="4"></th>` + diasSemana.map(dia => `<th>${dia}</th>`).join('') + `<th></th>`;
+                tabla.appendChild(filaDias);
+
+                empleados.forEach((empleado, index) => {
+                    const fila = document.createElement('tr');
+                    const totalAdelantos = calcularTotalAdelantos(empleado);
+                    const sueldoFinal = calcularSueldo(empleado);
+                    
+                    fila.innerHTML = `
+                        <td>${empleado.nombre}</td>
+                        <td>${empleado.sueldo.toFixed(2)}</td>
+                        <td>${totalAdelantos.toFixed(2)}</td>
+                        <td>${sueldoFinal.toFixed(2)}</td>
+                        ${empleado.asistencia.map((asiste, dia) => `
+                            <td class="attendance-cell">
+                                <span class="badge ${asiste ? 'badge-success' : 'badge-danger'}">
+                                    ${asiste ? 'Presente' : 'Ausente'}
+                                </span>
+                                <div class="attendance-controls">
+                                    <button onclick="marcarAsistencia(${index}, ${dia})" class="btn-sm">
+                                        ${asiste ? 'Marcar Ausente' : 'Marcar Presente'}
+                                    </button>
+                                </div>
+                                ${empleado.adelantos[dia] > 0 ? 
+                                    `<div>Adelanto: ${empleado.adelantos[dia]} 
+                                    <button onclick="quitarAdelanto(${index}, ${dia})" class="btn-sm btn-danger">Quitar</button>
+                                    </div>` : ''}
+                                <div>
+                                    <input type="number" id="adelanto-${index}-${dia}" class="adelanto-input" placeholder="Adelanto" />
+                                    <button onclick="agregarAdelanto(${index}, ${dia})" class="btn-sm">Agregar</button>
+                                </div>
+                            </td>
+                        `).join('')}
+                        <td>
+                            <button onclick="eliminarEmpleado(${index})" class="btn-sm btn-danger">Eliminar</button>
+                        </td>
+                    `;
+                    tabla.appendChild(fila);
+                });
+
+                // Agregar fila para mostrar el total de préstamos
+                const filaTotalPrestamos = document.createElement('tr');
+                filaTotalPrestamos.innerHTML = `
+                    <td colspan="9" style="text-align: right;"><strong>Total de Préstamos:</strong></td>
+                    <td><strong>${totalPrestamos.toFixed(2)}</strong></td>
+                    <td></td>
+                `;
+                tabla.appendChild(filaTotalPrestamos);
+            }
+
+            // Función para abrir modal
+            function abrirModal(modalId) {
+                document.getElementById(modalId).style.display = "block";
+                
+                if (modalId === 'modalPrestamos') {
+                    actualizarTablaPrestamos();
+                } else if (modalId === 'modalHistorico') {
+                    mostrarRegistrosHistoricos();
+                }
+            }
+
+            // Función para cerrar modal
+            function cerrarModal(modalId) {
+                document.getElementById(modalId).style.display = "none";
+            }
+
+            // Función para actualizar la tabla de préstamos
+            function actualizarTablaPrestamos() {
+                const tabla = document.getElementById('tablaPrestamosModal');
+                tabla.innerHTML = '';
+                
+                if (prestamos.length === 0) {
+                    tabla.innerHTML = '<tr><td colspan="3" style="text-align: center;">No hay préstamos registrados</td></tr>';
+                    return;
+                }
+
+                // Crear encabezados de la tabla
+                const encabezado = document.createElement('tr');
+                encabezado.innerHTML = `<th>Fecha</th><th>Cantidad</th><th>Acciones</th>`;
+                tabla.appendChild(encabezado);
+
+                prestamos.forEach((prestamo, index) => {
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td><input type="date" value="${prestamo.fecha}" onchange="modificarFecha(${index}, this.value)"></td>
+                        <td><input type="number" value="${prestamo.cantidad}" onchange="modificarCantidad(${index}, this.value)"></td>
+                        <td><button onclick="eliminarPrestamo(${index})" class="btn-danger">Eliminar</button></td>
+                    `;
+                    tabla.appendChild(fila);
+                });
+                
+                // Agregar fila para mostrar el total
+                const filaTotalPrestamos = document.createElement('tr');
+                filaTotalPrestamos.innerHTML = `
+                    <td style="text-align: right;"><strong>Total:</strong></td>
+                    <td><strong>${totalPrestamos.toFixed(2)}</strong></td>
+                    <td></td>
+                `;
+                tabla.appendChild(filaTotalPrestamos);
+            }
+
+            // Función para agregar préstamo desde el modal
+            async function agregarPrestamoModal() {
+                try {
+                    const cantidad = parseFloat(prompt("Ingrese la cantidad del préstamo:"));
+                    const fecha = prompt("Ingrese la fecha del préstamo (YYYY-MM-DD):", new Date().toISOString().split('T')[0]);
+                    
+                    if (isNaN(cantidad) || cantidad <= 0 || !fecha) {
+                        alert("Por favor, ingresa una cantidad y fecha válidas.");
+                        return;
+                    }
+                    
+                    if (!currentUser) {
+                        alert("Debes iniciar sesión para agregar préstamos.");
+                        return;
+                    }
+                    
+                    // Crear referencia para el nuevo préstamo
+                    const userRef = database.ref('usuarios/' + currentUser.uid);
+                    const nuevoPrestamoRef = userRef.child('prestamos').push();
+                    
+                    const nuevoPrestamo = {
+                        id: nuevoPrestamoRef.key,
+                        fecha, 
+                        cantidad
+                    };
+                    
+                    // Guardar en la base de datos
+                    await nuevoPrestamoRef.set({
+                        fecha: nuevoPrestamo.fecha,
+                        cantidad: nuevoPrestamo.cantidad
+                    });
+                    
+                    // Agregar a la lista local
+                    prestamos.push(nuevoPrestamo);
+                    totalPrestamos += cantidad;
+                    
+                    // Actualizar la interfaz
+                    actualizarTabla();
+                    actualizarTablaPrestamos();
+                    
+                    alert("Préstamo agregado correctamente");
+                } catch (error) {
+                    console.error("Error al agregar préstamo:", error);
+                    alert("Error al agregar préstamo: " + error.message);
+                }
+            }
+
+            // Función para modificar fecha de préstamo
+            async function modificarFecha(index, nuevaFecha) {
+                try {
+                    const prestamo = prestamos[index];
+                    prestamo.fecha = nuevaFecha;
+                    
+                    // Actualizar en la base de datos
+                    if (currentUser && prestamo.id) {
+                        const userRef = database.ref('usuarios/' + currentUser.uid);
+                        await userRef.child('prestamos').child(prestamo.id).child('fecha').set(prestamo.fecha);
+                    }
+                    
+                    alert("Fecha de préstamo modificada correctamente");
+                } catch (error) {
+                    console.error("Error al modificar fecha de préstamo:", error);
+                    alert("Error al modificar fecha: " + error.message);
+                }
+            }
+
+            // Función para modificar cantidad de préstamo
+            async function modificarCantidad(index, nuevaCantidad) {
+                try {
+                    const prestamo = prestamos[index];
+                    const cantidadAnterior = parseFloat(prestamo.cantidad);
+                    const nuevaCantidadNum = parseFloat(nuevaCantidad);
+                    
+                    if (isNaN(nuevaCantidadNum)) {
+                        alert("Por favor, ingresa una cantidad válida.");
+                        return;
+                    }
+                    
+                    prestamo.cantidad = nuevaCantidadNum;
+                    totalPrestamos = totalPrestamos - cantidadAnterior + nuevaCantidadNum;
+                    
+                    // Actualizar en la base de datos
+                    if (currentUser && prestamo.id) {
+                        const userRef = database.ref('usuarios/' + currentUser.uid);
+                        await userRef.child('prestamos').child(prestamo.id).child('cantidad').set(prestamo.cantidad);
+                    }
+                    
+                    // Actualizar la interfaz
+                    actualizarTabla();
+                    actualizarTablaPrestamos();
+                    
+                    alert("Cantidad de préstamo modificada correctamente");
+                } catch (error) {
+                    console.error("Error al modificar cantidad de préstamo:", error);
+                    alert("Error al modificar cantidad: " + error.message);
+                }
+            }
+
+            // Función para eliminar préstamo
+            async function eliminarPrestamo(index) {
+                try {
+                    if (confirm('¿Estás seguro de que deseas eliminar este préstamo?')) {
+                        const prestamo = prestamos[index];
+                        
+                        // Actualizar el total
+                        totalPrestamos -= parseFloat(prestamo.cantidad);
+                        
+                        // Eliminar de la base de datos
+                        if (currentUser && prestamo.id) {
+                            const userRef = database.ref('usuarios/' + currentUser.uid);
+                            await userRef.child('prestamos').child(prestamo.id).remove();
+                        }
+                        
+                        // Eliminar de la lista local
+                        prestamos.splice(index, 1);
+                        
+                        // Actualizar la interfaz
+                        actualizarTabla();
+                        actualizarTablaPrestamos();
+                        
+                        alert("Préstamo eliminado correctamente");
+                    }
+                } catch (error) {
+                    console.error("Error al eliminar préstamo:", error);
+                    alert("Error al eliminar préstamo: " + error.message);
+                }
+            }
+
+            // Cerrar modales al hacer clic fuera de ellos
+            window.onclick = function(event) {
+                const modales = document.getElementsByClassName('modal');
+                for (let i = 0; i < modales.length; i++) {
+                    if (event.target === modales[i]) {
+                        modales[i].style.display = "none";
+                    }
+                }
+            };
+            
+            // Agregar event listeners a los botones
+            btnVerPrestamos.addEventListener('click', () => abrirModal('modalPrestamos'));
+            btnGuardarRegistro.addEventListener('click', guardarRegistroSemanal);
+            btnVerHistorico.addEventListener('click', () => abrirModal('modalHistorico'));
+            semanaSelector.addEventListener('change', cambiarSemana);
+            btnAgregarPrestamoModal.addEventListener('click', agregarPrestamoModal);
+            cerrarModalPrestamos.addEventListener('click', () => cerrarModal('modalPrestamos'));
+            cerrarModalHistorico.addEventListener('click', () => cerrarModal('modalHistorico'));
+            
+            // Exponer funciones al ámbito global para que puedan ser llamadas desde HTML
+            window.eliminarEmpleado = eliminarEmpleado;
+            window.marcarAsistencia = marcarAsistencia;
+            window.agregarAdelanto = agregarAdelanto;
+            window.quitarAdelanto = quitarAdelanto;
+            window.abrirModal = abrirModal;
+            window.cerrarModal = cerrarModal;
+            window.agregarPrestamoModal = agregarPrestamoModal;
+            window.modificarFecha = modificarFecha;
+            window.modificarCantidad = modificarCantidad;
+            window.eliminarPrestamo = eliminarPrestamo;
+            window.cambiarSemana = cambiarSemana;
+            window.exportarRegistro = exportarRegistro;
+            window.eliminarRegistro = eliminarRegistro;
+            
+            // Mensaje de depuración para confirmar que todo el script se ha cargado
+            console.log("Script cargado completamente");
+            
+        } catch (error) {
+            // Capturar cualquier error durante la inicialización
+            console.error("Error durante la inicialización:", error);
+            alert("Error al inicializar la aplicación. Por favor, recarga la página.");
+        }
+    </script>
+</body>
+</html>
+
